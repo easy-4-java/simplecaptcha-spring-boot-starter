@@ -9,8 +9,7 @@
 
 1. SimpleCaptchaServlet、ChineseCaptchaServlet、StickyCaptchaServlet 自动注册
 
-
-### Maven
+### Maven Dependency
 
 ``` xml
 <dependency>
@@ -20,6 +19,16 @@
 </dependency>
 ```
 
-### Sample ：  CaptchaResolver Extends
+### Usage
 
-[https://github.com/vindell/spring-boot-starter-samples/tree/master/spring-boot-sample-simplecaptcha](https://github.com/vindell/spring-boot-starter-samples/tree/master/spring-boot-sample-simplecaptcha "spring-boot-sample-simplecaptcha")
+#### Step 1 ：Copy 1.1.1.Final-gatein-4 directory
+
+> Copy 1.1.1.Final-gatein-4 to D:\
+
+#### Step 2 ：Deploy  Simplecaptcha Jar Files to Maven Repository
+
+```bash
+mvn deploy:deploy-file -DgroupId=org.gatein.captcha -DartifactId=simplecaptcha -Dversion=1.1.1.Final-gatein-4 -Dpackaging=jar -Dfile=D:\1.1.1.Final-gatein-4\simplecaptcha-1.1.1.Final-gatein-4.jar -Durl=${repositoryUrl} -DrepositoryId=${repositoryId}
+mvn deploy:deploy-file -DgroupId=org.gatein.captcha -DartifactId=simplecaptcha -Dversion=1.1.1.Final-gatein-4 -Dpackaging=jar -Dfile=D:\1.1.1.Final-gatein-4\simplecaptcha-1.1.1.Final-gatein-4-sources.jar -Dclassifier=sources -Durl=${repositoryUrl} -DrepositoryId=${repositoryId}
+mvn deploy:deploy-file -DgroupId=org.gatein.captcha -DartifactId=simplecaptcha -Dversion=1.1.1.Final-gatein-4 -Dpackaging=pom -Dfile=D:\1.1.1.Final-gatein-4\simplecaptcha-1.1.1.Final-gatein-4.pom -Durl=${repositoryUrl} -DrepositoryId=${repositoryId}
+```
