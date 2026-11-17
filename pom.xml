@@ -472,7 +472,7 @@
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <simplecaptcha.version>1.1.1.Final-gatein-4</simplecaptcha.version>
+        <simplecaptcha.version>1.1.1-GA-Patch01</simplecaptcha.version>
         <maven.version>3.0</maven.version>
            <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
         <maven-jacoco-plugin.version>0.8.15</maven-jacoco-plugin.version>
@@ -487,6 +487,11 @@
     </properties>
 
     <repositories>
+
+        <repository>
+            <id>jboss-public</id>
+            <url>https://repository.jboss.org/maven2</url>
+        </repository>
 
         <repository>
             <id>sonatype-nexus-snapshots</id>
