@@ -18,6 +18,7 @@ package nl.captcha.spring.boot;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,9 +52,54 @@ class SimpleCaptchaAutoConfigurationTest {
     }
 
     @Test
-    @DisplayName("Auto-configuration is absent when property is not set")
-    void testNotLoadedWhenPropertyAbsent() {
+    @DisplayName("Auto-configuration loads without registering a captcha servlet when type is unset")
+    void testNoServletWhenTypeAbsent() {
         runner.withUserConfiguration(SimpleCaptchaAutoConfiguration.class)
-                .run(context -> assertThat(context).doesNotHaveBean(SimpleCaptchaAutoConfiguration.class));
+                .run(context -> {
+                    assertThat(context).hasSingleBean(SimpleCaptchaAutoConfiguration.class);
+                    assertThat(context).doesNotHaveBean("simpleCaptchaServlet");
+                    assertThat(context).doesNotHaveBean("chineseCaptchaServlet");
+                    assertThat(context).doesNotHaveBean("stickyCaptchaServlet");
+                });
+    }
+
+    @Test
+    void simpleTypeBindsPathAndDimensions() {
+        runner.withUserConfiguration(SimpleCaptchaAutoConfiguration.class)
+                .withPropertyValues("simple-captcha.captcha-type=simple",
+                        "simple-captcha.simple-pattern=/captcha.jpg",
+                        "simple-captcha.width=180",
+                        "simple-captcha.height=60")
+                .run(context -> {
+                    ServletRegistrationBean<?> bean = context.getBean("simpleCaptchaServlet", ServletRegistrationBean.class);
+                    assertThat(bean.getUrlMappings()).containsExactly("/captcha.jpg");
+                    assertThat(bean.getInitParameters()).containsEntry("width", "180").containsEntry("height", "60");
+                    assertThat(context).doesNotHaveBean("chineseCaptchaServlet");
+                    assertThat(context).doesNotHaveBean("stickyCaptchaServlet");
+                });
+    }
+
+    @Test
+    void chineseTypeRegistersItsOwnPath() {
+        runner.withUserConfiguration(SimpleCaptchaAutoConfiguration.class)
+                .withPropertyValues("simple-captcha.captcha-type=chinese",
+                        "simple-captcha.chinese-pattern=/chinese.jpg")
+                .run(context -> {
+                    ServletRegistrationBean<?> bean = context.getBean("chineseCaptchaServlet", ServletRegistrationBean.class);
+                    assertThat(bean.getUrlMappings()).containsExactly("/chinese.jpg");
+                    assertThat(context).doesNotHaveBean("simpleCaptchaServlet");
+                });
+    }
+
+    @Test
+    void stickyTypeRegistersItsOwnPath() {
+        runner.withUserConfiguration(SimpleCaptchaAutoConfiguration.class)
+                .withPropertyValues("simple-captcha.captcha-type=sticky",
+                        "simple-captcha.sticky-pattern=/sticky.jpg")
+                .run(context -> {
+                    ServletRegistrationBean<?> bean = context.getBean("stickyCaptchaServlet", ServletRegistrationBean.class);
+                    assertThat(bean.getUrlMappings()).containsExactly("/sticky.jpg");
+                    assertThat(context).doesNotHaveBean("simpleCaptchaServlet");
+                });
     }
 }
