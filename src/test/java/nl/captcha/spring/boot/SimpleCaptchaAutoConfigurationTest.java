@@ -1,59 +1,56 @@
-/*
- * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package nl.captcha.spring.boot;
 
-import org.junit.jupiter.api.DisplayName;
+import nl.captcha.servlet.ChineseCaptchaServlet;
+import nl.captcha.servlet.SimpleCaptchaServlet;
+import nl.captcha.servlet.StickyCaptchaServlet;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.boot.web.servlet.ServletRegistrationBean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-/**
- * Unit tests for {{ @link SimpleCaptchaAutoConfiguration }}.
- *
- * <p>Verifies the auto-configuration activates under the expected conditions
- * and exposes its declared beans.</p>
- *
- * @author <a href="https://github.com/loong10k">Loong Wan</a>
- * @since 1.0.0
- */
-@DisplayName("SimpleCaptchaAutoConfiguration Tests")
 class SimpleCaptchaAutoConfigurationTest {
 
-    private final ApplicationContextRunner runner = new ApplicationContextRunner();
+    private final ApplicationContextRunner runner = new ApplicationContextRunner()
+            .withUserConfiguration(SimpleCaptchaAutoConfiguration.class);
 
     @Test
-    @DisplayName("Auto-configuration class can be instantiated")
-    void testInstantiation() {
-        SimpleCaptchaAutoConfiguration configuration = new SimpleCaptchaAutoConfiguration();
-        assertThat(configuration).isNotNull();
+    void registersSimpleServletWithConfiguredPathAndDimensions() {
+        runner.withPropertyValues("simple-captcha.captcha-type=simple",
+                        "simple-captcha.simple-pattern=/captcha.jpg",
+                        "simple-captcha.width=240", "simple-captcha.height=70")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    ServletRegistrationBean<?> registration = context.getBean("simpleCaptchaServlet", ServletRegistrationBean.class);
+                    assertThat(registration.getServlet()).isInstanceOf(SimpleCaptchaServlet.class);
+                    assertThat(registration.getUrlMappings()).containsExactly("/captcha.jpg");
+                    assertThat(registration.getInitParameters()).containsEntry("width", "240").containsEntry("height", "70");
+                    assertThat(context).doesNotHaveBean("chineseCaptchaServlet");
+                    assertThat(context).doesNotHaveBean("stickyCaptchaServlet");
+                });
     }
 
     @Test
-    @DisplayName("Auto-configuration loads when 'spring.boot.enabled=true'")
-    void testLoadsWhenEnabledPropertySet() {
-        runner.withUserConfiguration(SimpleCaptchaAutoConfiguration.class)
-                .withPropertyValues("spring.boot.enabled=true")
-                .run(context -> assertThat(context).hasSingleBean(SimpleCaptchaAutoConfiguration.class));
+    void registersChineseServletOnlyForChineseType() {
+        runner.withPropertyValues("simple-captcha.captcha-type=chinese")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    ServletRegistrationBean<?> registration = context.getBean("chineseCaptchaServlet", ServletRegistrationBean.class);
+                    assertThat(registration.getServlet()).isInstanceOf(ChineseCaptchaServlet.class);
+                    assertThat(registration.getUrlMappings()).containsExactly("/chinese-captcha.jpg");
+                    assertThat(context).doesNotHaveBean("simpleCaptchaServlet");
+                });
     }
 
     @Test
-    @DisplayName("Auto-configuration is absent when property is not set")
-    void testNotLoadedWhenPropertyAbsent() {
-        runner.withUserConfiguration(SimpleCaptchaAutoConfiguration.class)
-                .run(context -> assertThat(context).doesNotHaveBean(SimpleCaptchaAutoConfiguration.class));
+    void registersStickyServletOnlyForStickyType() {
+        runner.withPropertyValues("simple-captcha.captcha-type=sticky")
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    ServletRegistrationBean<?> registration = context.getBean("stickyCaptchaServlet", ServletRegistrationBean.class);
+                    assertThat(registration.getServlet()).isInstanceOf(StickyCaptchaServlet.class);
+                    assertThat(registration.getUrlMappings()).containsExactly("/sticky-captcha.jpg");
+                    assertThat(context).doesNotHaveBean("simpleCaptchaServlet");
+                });
     }
 }

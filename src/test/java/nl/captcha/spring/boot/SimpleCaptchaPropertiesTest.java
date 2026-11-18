@@ -1,125 +1,45 @@
-/*
- * Copyright (c) 2018, hiwepy (https://github.com/hiwepy).
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
- */
 package nl.captcha.spring.boot;
 
-import org.junit.jupiter.api.DisplayName;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-/**
- * Unit tests for {{ @link SimpleCaptchaProperties }}.
- *
- * <p>Verifies default values, getters/setters and POJO contract.</p>
- *
- * @author <a href="https://github.com/loong10k">Loong Wan</a>
- * @since 1.0.0
- */
-@DisplayName("SimpleCaptchaProperties Tests")
 class SimpleCaptchaPropertiesTest {
+
     @Test
-    @DisplayName("Default constructor creates non-null instance")
-    void testDefaultInstance() {
-        SimpleCaptchaProperties props = new SimpleCaptchaProperties();
-        assertThat(props).isNotNull();
+    void exposesDefaultsAndSetters() {
+        SimpleCaptchaProperties properties = new SimpleCaptchaProperties();
+        assertThat(properties.getCaptchaType()).isEqualTo(SimpleCaptchaProperties.CaptchaType.SIMPLE);
+        assertThat(properties.getSimplePattern()).isEqualTo("/simple-captcha.jpg");
+        assertThat(properties.getChinesePattern()).isEqualTo("/chinese-captcha.jpg");
+        assertThat(properties.getStickyPattern()).isEqualTo("/sticky-captcha.jpg");
+        assertThat(properties.getWidth()).isEqualTo(200);
+        assertThat(properties.getHeight()).isEqualTo(50);
+
+        properties.setCaptchaType(SimpleCaptchaProperties.CaptchaType.CHINESE);
+        properties.setSimplePattern("/simple.jpg");
+        properties.setChinesePattern("/chinese.jpg");
+        properties.setStickyPattern("/sticky.jpg");
+        properties.setWidth(240);
+        properties.setHeight(70);
+        assertThat(properties.getCaptchaType()).isEqualTo(SimpleCaptchaProperties.CaptchaType.CHINESE);
+        assertThat(properties.getSimplePattern()).isEqualTo("/simple.jpg");
+        assertThat(properties.getChinesePattern()).isEqualTo("/chinese.jpg");
+        assertThat(properties.getStickyPattern()).isEqualTo("/sticky.jpg");
+        assertThat(properties.getWidth()).isEqualTo(240);
+        assertThat(properties.getHeight()).isEqualTo(70);
     }
 
     @Test
-    @DisplayName("Field 'simplePattern' can be set and read")
-    void testSimplePatternField() {
-        SimpleCaptchaProperties props = new SimpleCaptchaProperties();
-        // Use reflection to set private field (covers all fields including those without setters)
-        try {
-            java.lang.reflect.Field f = SimpleCaptchaProperties.class.getDeclaredField("simplePattern");
-            f.setAccessible(true);
-            f.set(props, "test");
-            Object value = f.get(props);
-            assertThat(value).isNotNull();
-        } catch (Exception e) {
-            // Field may have a more complex type; skip silently
+    void resolvesAllCaptchaTypesIgnoringCase() {
+        for (SimpleCaptchaProperties.CaptchaType type : SimpleCaptchaProperties.CaptchaType.values()) {
+            assertThat(SimpleCaptchaProperties.CaptchaType.valueOfIgnoreCase(type.get().toUpperCase())).isEqualTo(type);
+            assertThat(type.equals(type)).isTrue();
+            assertThat(type.equals(type.get())).isTrue();
         }
-    }
-
-    @Test
-    @DisplayName("Field 'chinesePattern' can be set and read")
-    void testChinesePatternField() {
-        SimpleCaptchaProperties props = new SimpleCaptchaProperties();
-        // Use reflection to set private field (covers all fields including those without setters)
-        try {
-            java.lang.reflect.Field f = SimpleCaptchaProperties.class.getDeclaredField("chinesePattern");
-            f.setAccessible(true);
-            f.set(props, "test");
-            Object value = f.get(props);
-            assertThat(value).isNotNull();
-        } catch (Exception e) {
-            // Field may have a more complex type; skip silently
-        }
-    }
-
-    @Test
-    @DisplayName("Field 'stickyPattern' can be set and read")
-    void testStickyPatternField() {
-        SimpleCaptchaProperties props = new SimpleCaptchaProperties();
-        // Use reflection to set private field (covers all fields including those without setters)
-        try {
-            java.lang.reflect.Field f = SimpleCaptchaProperties.class.getDeclaredField("stickyPattern");
-            f.setAccessible(true);
-            f.set(props, "test");
-            Object value = f.get(props);
-            assertThat(value).isNotNull();
-        } catch (Exception e) {
-            // Field may have a more complex type; skip silently
-        }
-    }
-
-    @Test
-    @DisplayName("Field 'width' can be set and read")
-    void testWidthField() {
-        SimpleCaptchaProperties props = new SimpleCaptchaProperties();
-        // Use reflection to set private field (covers all fields including those without setters)
-        try {
-            java.lang.reflect.Field f = SimpleCaptchaProperties.class.getDeclaredField("width");
-            f.setAccessible(true);
-            f.set(props, 42);
-            Object value = f.get(props);
-            assertThat(value).isNotNull();
-        } catch (Exception e) {
-            // Field may have a more complex type; skip silently
-        }
-    }
-
-    @Test
-    @DisplayName("Field 'height' can be set and read")
-    void testHeightField() {
-        SimpleCaptchaProperties props = new SimpleCaptchaProperties();
-        // Use reflection to set private field (covers all fields including those without setters)
-        try {
-            java.lang.reflect.Field f = SimpleCaptchaProperties.class.getDeclaredField("height");
-            f.setAccessible(true);
-            f.set(props, 42);
-            Object value = f.get(props);
-            assertThat(value).isNotNull();
-        } catch (Exception e) {
-            // Field may have a more complex type; skip silently
-        }
-    }
-
-    @Test
-    @DisplayName("Public constant 'PREFIX' has expected value")
-    void testPREFIXConstant() {
-        assertThat(SimpleCaptchaProperties.PREFIX).isEqualTo("simple-captcha");
+        assertThatThrownBy(() -> SimpleCaptchaProperties.CaptchaType.valueOfIgnoreCase("unknown"))
+                .isInstanceOf(NoSuchElementException.class);
     }
 }
